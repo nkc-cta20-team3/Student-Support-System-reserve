@@ -84,7 +84,8 @@ func main() {
 		routeapi.GET("/aa/:absence_data", api.AuthorizeAbsence)
 		routeapi.GET("/da/:absence_list", api.DeleteAbsence)
 		// routeapi.GET("/ra/:absence_list", api.RegisterAbsence)
-		routeapi.GET("/ual/:teacher_data", api.UnAuthorizationList)
+		routeapi.POST("/ual", api.UnAuthorizationList)
+		routeapi.GET("/ual/:teacher_data", api.UnAuthorizationListGet)
 	}
 
 	g.Run(":8080")
