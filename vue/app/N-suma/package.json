@@ -13,7 +13,8 @@
     "firebase": "^9.22.1",
     "firebase-tools": "^12.2.1",
     "vue": "^3.2.47",
-    "vue-router": "4"
+    "vue-router": "4",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
