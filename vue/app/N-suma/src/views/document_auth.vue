@@ -23,7 +23,8 @@
     </div>
 
     <div class="container">
-        <table class="table">
+        
+        <table class="table" v-if="users.length > 0">
             <thead>
                 <tr>
                     <th>クラス略称</th>
@@ -41,46 +42,61 @@
                 </tr>
             </thead>
         </table>
+        <div v-else>
+            <div class="has-text-centered">
+                <div class="title mb-5">
+                    認可待ちの書類はありません
+                </div>
+            </div> 
+        </div>
     </div>
 </template>
 
 <script setup>
 
     import { onMounted,ref } from 'vue'
-    const users = ref(
-        [
-            {
-                id: 1,
-                class: 'CS2',
-                name: '石井 大介',
-                type: '就活',
-            },
-                {
-                id: 2,
-                class: 'CT4B',
-                name: '鈴木 孝明',
-                type: '就活',
-            },
-                {
-                id: 3,
-                class: 'CT2A',
-                name: '遠藤 雄一',
-                type: '資格',
-            },
-        ]
-    )
+    
+    const users = ref([])
 
     onMounted(() => {
-        if(users.value.length < 1){
-            alert('未認可の書類はありません。');
-        }
-        else{
-            lists()
-        }    
+
+        // 認可待ちの書類一覧を取得
+        fetch(new URL("ual" , import.meta.env.VITE_API_URL), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                "teacher_id": 1,
+                "position": 1,
+                "class_name": "CTA20"
+            })
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`)
+            }
+            return response.json()
+        })
+        .then((data) => {
+            
+            // 取得したデータをusersに格納
+            data['document'].forEach((user) => {
+                users.value.push({
+                    id: user['document_id'],
+                    class: user['class_name'],
+                    name: user['student_name'],
+                    type: user['absence_category'],
+                })
+            })
+
+        })
+        .catch((error) => {
+            console.log(error)
+        })
     })
 
-    const lists = () => {
-        users.value.list((a, b) => { return b.id - a.id });
-    }
+    
     
 </script>
