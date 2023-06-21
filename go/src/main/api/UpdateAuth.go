@@ -40,11 +40,18 @@ func UpdateAuth(c *gin.Context) {
 	log.Println(teacherPosition)
 
 	if teacherPosition == documentStatus+1 {
-		//認可できる状態
-
-		db.Table("absence_document").
-			Where("document_id = ?", request.DocumentID).
-			Updates(model.UpdateDocument{Status: teacherPosition, TeacherComment: request.TeacherComment})
+		
+		if teacherPosition == 1 {
+			//担任だけが変更する
+			db.Table("absence_document").
+				Where("document_id = ?", request.DocumentID).
+				Updates(model.UpdateDocument{Status: teacherPosition, TeacherComment: request.TeacherComment})
+		}else if teacherPosition >= 2 {
+			//教員が認可する
+			db.Table("absence_document").
+				Where("document_id = ?", request.DocumentID).
+				Updates(model.UpdateDocument{Status: teacherPosition})
+		}
 
 		//エラーハンドリング
 		if db.Error != nil {
