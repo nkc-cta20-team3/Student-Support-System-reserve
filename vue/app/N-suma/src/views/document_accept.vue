@@ -29,7 +29,7 @@
         このコードでは、何かしらのエラーでデータを取得できなかった場合の処理がないため、実装する必要がある。
         また、教員コメントが入力済みのデータが渡された場合の処理も考慮しなければならない
     -->
-    <table class="table " v-if="document != null">
+    <table class="table container" v-if="document != null">
         <thead>
             <tr>
                 <th>申請日</th>
