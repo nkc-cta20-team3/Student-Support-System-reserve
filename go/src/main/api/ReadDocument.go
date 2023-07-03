@@ -21,6 +21,7 @@ func ReadDocument(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	//log.Print(request.DocumentID)
 
 	//データベース接続
 	db := infra.DBInitGorm()
@@ -31,8 +32,6 @@ func ReadDocument(c *gin.Context) {
 	}
 
 	/*
-
-
 		type ReadDocumentResponse struct {
 			DocumentID int `json:"document_id"`
 			RequestDate time.Time `json:"request_date"`
@@ -61,10 +60,11 @@ func ReadDocument(c *gin.Context) {
 			"oa.location",
 			"oa.student_comment",
 			"oa.teacher_comment",
-			"oa.user_uid",
-			"st.class_name",
-			"st.student_name").
-		Joins("JOIN user ON oa.user_uid = user.user_id").
+			"user.user_uuid",
+			"cs.class_name",
+			"user.user_name").
+		Joins("JOIN user ON oa.user_id = user.user_id").
+		Joins("JOIN classification AS cs ON user.class_id = cs.class_id").
 		Where("document_id = ?", request.DocumentID).
 		First(&response)
 	if db.Error != nil {

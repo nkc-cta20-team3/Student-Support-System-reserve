@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	// 
+	//
 	g := gin.Default()
 	g.Use(cors.New(cors.Config{
 
@@ -53,14 +53,14 @@ func main() {
 		// curl -X POST http://localhost:8080/api/ral
 		routes.POST("/ral", api.ReadAuthList)
 
-
 		routes.POST("/rd", api.ReadDocument)
 
-
 		routes.POST("/ua", api.UpdateAuth)
-		
 
-		
+		routes.POST("/rp", api.ReadPosition)
+
+		routes.POST("/ra", api.RejectAuth)
+
 		// 実装予定の管理者向けのAPI
 		// routes.POST("/cd", api.CreateDocument)
 		// routes.POST("/dd", api.DeleteDocument)
@@ -68,7 +68,7 @@ func main() {
 		// 動作確認用
 		// curl -X GET http://localhost:8080/api/hello
 		routes.GET("/hello", api.Hello)
-		
+
 	}
 
 	g.Run(":8080")
