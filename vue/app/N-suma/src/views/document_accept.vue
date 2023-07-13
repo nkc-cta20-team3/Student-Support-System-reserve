@@ -29,7 +29,7 @@
         このコードでは、何かしらのエラーでデータを取得できなかった場合の処理がないため、実装する必要がある。
         また、教員コメントが入力済みのデータが渡された場合の処理も考慮しなければならない
     -->
-    <table class="table " v-if="document != null">
+    <table class="table container" v-if="document != null">
         <thead>
             <tr>
                 <th>申請日</th>
@@ -85,8 +85,8 @@
             </div>
 
             <div class="is-flex mb-5">
-                <div class="ml-4 button is-medium" @click="OnClickAccept(true)">受理</div>
-                <div class="ml-4 button is-medium" @click="OnClickAccept(false)">却下</div>
+                <div class="ml-4 button is-medium" @click="approve">受理</div>
+                <div class="ml-4 button is-medium" @click="reject">却下</div>
             </div>
         </div>
     </div>
@@ -107,21 +107,24 @@
     const DocId = store.state.DocId
     const document = ref()
 
-    // 認可用のAPIを叩く
-    const OnClickAccept = (isAcceptance) => {
+    // 文字を入力されているかのチェック
+    const validateComment = () => {
+        if (inputValue.value.trim()) {
+            return false;
+        }
+        return true;
+    }
 
-        if (!inputValue.value){
+    // 認可ボタンをクリックした時
+    const approve = () => {
+
+        // 文字をチェックする
+        if (validateComment()) {
             alert("コメントを入力してください。")
             return
-        }     
-
-        if(!isAcceptance){
-            // 却下された時のAPI側の仕様が定まっていないため保留
-            alert("却下されました")
-            return;
         }
 
-
+        // 認可用のAPIをたたく
         fetch(new URL("ua" , import.meta.env.VITE_API_URL), {
             method: 'POST',
             headers: {
@@ -130,7 +133,7 @@
             },
             body: JSON.stringify({
                 "document_id": DocId,
-	            "teacher_id": 1,
+                "teacher_id": 1,
                 "teacher_comment": inputValue.value,
             })
         })
@@ -146,16 +149,75 @@
                 throw new Error(`${data.message}`)
             }
 
-            alert("受理されました")
-            router.push('/document_auth')
+            if(confirm('受理されました。次の書類に遷移しますか？\n(キャンセルした場合は未認可書類一覧に戻ります。)')){
+                router.push(teacher_id, 1,'/document_accept');
+            } else {
+                    alert("未認可書類一覧に戻ります。") 
+                    router.push('/document_auth');
+            }
 
         })
         .catch((error) => {
+            // 認可用のAPIがうまく叩けなかった場合にエラーを出す
             alert(error)
         })
 
-    }
+    };
 
+    // 却下ボタンをクリックした時
+    const reject = () => {
+        
+        //コメントチェック
+        if (validateComment()) {
+            alert("コメントを入力してください。")
+        }
+
+        // 認可待ちの書類一覧を取得
+        // 本来はログインユーザーのIDを取得し、そのユーザーの認可待ちの書類一覧を取得する
+        // 現在は、ユーザーIDをハードコーディングしているため、修正する必要があります
+        fetch(new URL("gu" , import.meta.env.VITE_API_URL), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                "document_id": DocId
+            })
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`)
+            }
+            return response.json()
+        })
+        .then((data) => {
+            
+            // // 取得したデータをusersに格納
+            // data.document.forEach((document) => {
+            //     documents.value.push({
+            //         id: document.document_id,
+            //         class: document.class_name,
+            //         name: document.student_name,
+            //         type: document.absence_category,
+            //     })
+            // })
+
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+
+        if(confirm('却下されました。次の書類に遷移しますか？\n(キャンセルした場合は未認可書類一覧に戻ります。)')){
+            //却下ホップアップOK時の処理
+            router.push(teacher_id, 1,'/document_accept');
+        }else{
+            //却下ホップアップキャンセル時の処理
+            alert("未認可書類一覧に戻ります。") 
+            router.push('/document_auth');
+        }
+    };
+    
     onMounted(() => {
 
         // DocIdがnullの場合は、document_authに戻る
@@ -185,6 +247,7 @@
             // 取得したデータを格納
             document.value = data.document;
             studentComment.value = data.document.student_comment;
+
             
             // データ確認用
             // console.log(document.value)

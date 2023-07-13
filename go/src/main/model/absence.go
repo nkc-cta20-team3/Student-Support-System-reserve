@@ -90,3 +90,8 @@ type CreateDocumentRequest struct {
 type DeleteDocumentRequest struct {
 	DocumentID int `json:"document_id"`
 }
+
+// Rejectionで使用する構造体
+type DocumentRejection struct{
+	DocumentID int `json:"document_id"`
+}
